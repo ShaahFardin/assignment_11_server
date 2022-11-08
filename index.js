@@ -31,6 +31,7 @@ app.get('/services', async (req, res) => {
     const page = Number(req.query.page);
     const size = Number(req.query.size);
     const cursor = servicesCollection.find({});
+
     const services =await cursor.skip(page*size).limit(size).toArray();
 
     try {
@@ -62,6 +63,26 @@ app.get('/service/:id', async(req, res)=>{
         })
     } catch (error) {
         console.log(error.name. error.message, error.stack);
+        res.send({
+            success: false,
+            error: error.message
+        })
+    }
+})
+
+
+//collection: event-photoshoot-review
+
+// event photoshoot user review
+app.get('/eventReview', async(req, res)=>{
+    
+    const eventReview = await client.db('Photography').collection('event-photoshoot-review').find({}).toArray();
+    try {
+        res.send({
+            success: true,
+            data: eventReview
+        })
+    } catch (error) {
         res.send({
             success: false,
             error: error.message
