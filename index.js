@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 5000;
@@ -27,7 +27,11 @@ run();
 const servicesCollection = client.db('Photography').collection('services');
 
 app.get('/services', async (req, res) => {
-    const services = await servicesCollection.find({}).toArray();
+   
+    const page = Number(req.query.page);
+    const size = Number(req.query.size);
+    const cursor = servicesCollection.find({});
+    const services =await cursor.skip(page*size).limit(size).toArray();
 
     try {
         res.send({
@@ -37,6 +41,27 @@ app.get('/services', async (req, res) => {
         })
     } catch (error) {
         console.log(error.name, error.message, error.stack);
+        res.send({
+            success: false,
+            error: error.message
+        })
+    }
+})
+
+
+app.get('/service/:id', async(req, res)=>{
+
+    const id = req.params;
+    const service = await servicesCollection.findOne({_id:ObjectId(id)});
+
+    try {
+        res.send({
+            success: true,
+            message: "Got the id specific data",
+            data: service
+        })
+    } catch (error) {
+        console.log(error.name. error.message, error.stack);
         res.send({
             success: false,
             error: error.message
