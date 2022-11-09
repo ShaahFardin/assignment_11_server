@@ -190,6 +190,34 @@ app.delete('/myReviews/:id', async (req, res) => {
 })
 
 
+app.patch('/update/:id', async (req, res) => {
+    const { id } = req.params
+    try {
+        const reviewCollectioin = client.db('Photography').collection('userReviews')
+        const result = await reviewCollectioin.updateOne({ _id: ObjectId(id) }, { $set: req.body })
+        console.log(result);
+        if (result.modifiedCount) {
+            res.send({
+                success: true,
+                message: `Successfully updated the review`
+            })
+        } else {
+            res.send({
+                success: false,
+                message: "Could not update the review"
+            })
+        }
+    } catch (error) {
+        res.send({
+            success: false,
+            error: error.message
+        })
+    }
+})
+
+
+
+
 
 app.get('/', (req, res) => {
     res.send("Server is up and running");
