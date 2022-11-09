@@ -91,6 +91,34 @@ app.get('/eventReview', async(req, res)=>{
 })
 
 
+// user review
+
+app.post('/userReviews', async(req, res)=>{
+    const  userReviews = await client.db('Photography').collection('userReviews').insertOne(req.body);
+    try {
+        if(userReviews.insertedId){
+            res.send({
+                success: true,
+                message : "Reviews added to the database succesfully"
+            })
+        }else{
+            res.send({
+                success: false,
+                message: "Could not insert the review to the database"
+            })
+        }
+    } catch (error) {
+        console.log(error.name, error.message, error.stack);
+        res.send({
+            success: false,
+            error: error.message
+        })
+    }
+})
+
+
+
+
 app.get('/', (req, res) => {
     res.send("Server is up and running");
 });
