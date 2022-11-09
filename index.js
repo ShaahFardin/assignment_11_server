@@ -156,6 +156,41 @@ app.get('/myReviews', async (req, res) => {
 })
 
 
+app.delete('/myReviews/:id', async (req, res) => {
+
+    const { id } = req.params;
+    try {
+
+        const id = req.params;
+        const reviewCollectioin = client.db('Photography').collection('userReviews')
+        const reviews = await reviewCollectioin.findOne({ _id: ObjectId(id) });
+        if (!reviews._id) {
+            res.send({
+                success: false,
+                error: "Review does not exist"
+            });
+            return;
+        }
+        const result = await reviewCollectioin.deleteOne({ _id: ObjectId(id) });
+        if (result.deletedCount) {
+            res.send({
+                success: true,
+                message: `Successfully deleted the reviews ${reviews}`
+            })
+        } else {
+
+        }
+
+    } catch (error) {
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
+
+
 app.get('/', (req, res) => {
     res.send("Server is up and running");
 });
