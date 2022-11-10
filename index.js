@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const app = express();
@@ -8,14 +9,33 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+const token = process.env.ACCESS_TOKEN_SECRET
+console.log(token);
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.il5mbbt.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
+
+function verifyJWT(req, res, next) {
+    const authHeader = req.headers.authorization
+    if (!authHeader) {
+      return  res.status(401).send({ message: "Unauthorized access" })
+    }
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded){
+        if (err) {
+           return res.status(403).send({ message: "invalid token" })
+        }
+        req.decoded = decoded;
+        next();
+    })
+}
+
+
 async function run() {
     try {
         await client.connect();
-        console.log(`Database connected at , ${uri}`);
+        console.log(`Database connected`);
     } catch (err) {
         console.log(err.name, err.message, err.stack);
     }
@@ -50,8 +70,8 @@ app.get('/services', async (req, res) => {
 })
 
 // Add services
-app.post('/add-service', async(req, res)=>{
-    const addedServices =await servicesCollection.insertOne(req.body)
+app.post('/add-service', async (req, res) => {
+    const addedServices = await servicesCollection.insertOne(req.body)
     try {
         if (addedServices.insertedId) {
             res.send({
@@ -159,17 +179,26 @@ app.get('/userReviews', async (req, res) => {
     }
 })
 
-app.get('/myReviews', async (req, res) => {
-
+app.get('/myReviews', verifyJWT, async (req, res) => {
+     
+    const decoded = req.decoded
+    console.log("Inside myReviews api",decoded);
+    // if(decoded.email !== req.query.email){
+    //     res.status(403).send({
+    //         success: false,
+    //         message: "unathorized access"
+    //     })
+    // }
     const query = {
         email: req.query.email
     }
-    const myReviews =await client.db('Photography').collection('userReviews').find(query).toArray();
+    // console.log(req.headers.authorization);
+    const myReviews = await client.db('Photography').collection('userReviews').find(query).toArray();
 
     try {
         res.send({
-            success:true,
-            data:myReviews 
+            success: true,
+            data: myReviews
         })
     } catch (error) {
         res.send({
@@ -239,7 +268,13 @@ app.patch('/update/:id', async (req, res) => {
     }
 })
 
+// jwt token
+app.post('/jwt', async (req, res) => {
 
+    const user = req.body
+    const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET)
+    res.send({ token })
+})
 
 
 
