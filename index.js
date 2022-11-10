@@ -49,6 +49,30 @@ app.get('/services', async (req, res) => {
     }
 })
 
+// Add services
+app.post('/add-service', async(req, res)=>{
+    const addedServices =await servicesCollection.insertOne(req.body)
+    try {
+        if (addedServices.insertedId) {
+            res.send({
+                success: true,
+                message: "Service added to the database succesfully"
+            })
+        } else {
+            res.send({
+                success: false,
+                message: "Could not insert the service to the database"
+            })
+        }
+    } catch (error) {
+        console.log(error.name, error.message, error.stack);
+        res.send({
+            success: false,
+            error: error.message
+        })
+    }
+})
+
 
 app.get('/service/:id', async (req, res) => {
 
