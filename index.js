@@ -71,6 +71,29 @@ app.post('/createUser', async(req, res)=>{
     }
 
 })
+// get manually logged in user
+app.get('/user', async (req, res) => {
+    const query = {
+        email: req.body.email
+    }
+    const  usersCollection = client.db('Photography').collection('LoggedInUsers')
+    const result = await usersCollection.findOne(query).toArray();
+    
+    try {
+        res.send({
+            success: true,
+            message: "Got the id specific data",
+            data: result
+        })
+    } catch (error) {
+        console.log(error.name.error.message, error.stack);
+        res.send({
+            success: false,
+            error: error.message
+        })
+    }
+})
+
 
 app.get('/services', async (req, res) => {
 
