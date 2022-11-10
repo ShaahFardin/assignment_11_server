@@ -46,6 +46,32 @@ run();
 
 const servicesCollection = client.db('Photography').collection('services');
 
+
+// Api for manually logged in user
+app.post('/createUser', async(req, res)=>{
+    const usersCollection = await client.db('Photography').collection('LoggedInUsers').insertOne(req.body);
+    try {
+        if (usersCollection.insertedId) {
+            res.send({
+                success: true,
+                message: "user added to the database succesfully"
+            })
+        } else {
+            res.send({
+                success: false,
+                message: "Could not insert the user to the database"
+            })
+        }
+    } catch (error) {
+        console.log(error.name, error.message, error.stack);
+        res.send({
+            success: false,
+            error: error.message
+        })
+    }
+
+})
+
 app.get('/services', async (req, res) => {
 
     const page = Number(req.query.page);
