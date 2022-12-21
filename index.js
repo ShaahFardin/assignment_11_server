@@ -10,7 +10,6 @@ app.use(cors());
 app.use(express.json());
 
 const token = process.env.ACCESS_TOKEN_SECRET
-console.log(token);
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.il5mbbt.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
